@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neon Ambient Light Cube + Tic Tac Toe</title>
+  <style>
+    :root {
+      --size: 260px;
+      --border: 3px;
+      --glow: 18px;
+      --glow-hard: 28px;
+      --ambient: 0.25;
+      --rainbow: conic-gradient(from 0deg at 50% 50%,
+          #00e5ff, #5cfcc2, #7cff00, #ffe600, #ff7b00, #ff00e0, #00b7ff);
+
+      --accent: #00e5ff;
+      --accent2: #ff00e0;
+      --win: #7cff00;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100svh;
+      background: radial-gradient(1200px 800px at 50% 60%, #0f1220, #08090f 60%, #06070b 100%);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Heading */
+    header.title {
+      width: 100%;
+      text-align: center;
+      padding: 14px 12px 6px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: clamp(18px, 4.5vw, 36px);
+      background: linear-gradient(90deg, #ff6ec4, #7873f5, #4ade80, #facc15, #f87171);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: titleShift 6s linear infinite;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    @keyframes titleShift {
+      0% {
+        background-position: 0% 50%
+      }
+
+      50% {
+        background-position: 100% 50%
+      }
+
+      100% {
+        background-position: 0% 50%
+      }
+    }
+
+    /* Stage / Cube */
+    .stage {
+      display: grid;
+      place-items: center;
+      perspective: 1200px;
+      perspective-origin: 50% 50%;
+      touch-action: none;
+    }
+
+    .scene {
+      width: var(--size);
+      height: var(--size);
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform .12s ease-out;
+    }
+
+    .cube {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #00e5ff 0%, #7cff00 50%, #ff00e0 100%);
+      opacity: var(--ambient);
+      border-radius: 10px;
+      box-shadow: inset 0 0 60px #00d8ff33, inset 0 0 120px #ff00e033;
+      animation: hue 16s linear infinite;
+    }
+
+    .face::before,
+    .face::after {
+      content: "";
+      position: absolute;
+      inset: calc(var(--border) * -1);
+      background: var(--rainbow);
+      border-radius: 12px;
+      animation: hue 16s linear infinite;
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .face::before {
+      padding: var(--border);
+      box-shadow: 0 0 var(--glow-hard) #00e5ff50, 0 0 calc(var(--glow-hard)*1.6) #ff00e040;
+    }
+
+    .face::after {
+      filter: blur(var(--glow));
+      opacity: .95;
+      padding: calc(var(--border) + 2px);
+    }
+
+    @keyframes hue {
+      to {
+        filter: hue-rotate(360deg);
+      }
+    }
+
+    .face--front {
+      transform: translateZ(calc(var(--size)/2));
+    }
+
+    .face--back {
+      transform: rotateY(180deg) translateZ(calc(var(--size)/2));
+    }
+
+    .face--right {
+      transform: rotateY(90deg) translateZ(calc(var(--size)/2));
+    }
+
+    .face--left {
+      transform: rotateY(-90deg) translateZ(calc(var(--size)/2));
+    }
+
+    .face--top {
+      transform: rotateX(90deg) translateZ(calc(var(--size)/2));
+    }
+
+    .face--bottom {
+      transform: rotateX(-90deg) translateZ(calc(var(--size)/2));
+    }
+
+    @media (max-width:600px) {
+      :root {
+        --size: 200px;
+      }
+    }
+
+    /* ===== Tic Tac Toe Section (kept same theme) ===== */
+    .game-wrap {
+      width: min(900px, 92vw);
+      margin: 6px auto 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, #0b0f1f77, #0b0f1f33);
+      box-shadow: 0 20px 60px #0007;
+      backdrop-filter: blur(6px);
+    }
+
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .game-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      font-size: clamp(16px, 3.6vw, 22px);
+    }
+
+    .sg-icons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Player area: names + logo */
+    .players {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .player-card {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: linear-gradient(180deg, #071029, #06101f);
+      padding: 8px 10px;
+      border-radius: 10px;
+      box-shadow: inset 0 0 0 1px #243064;
+    }
+
+    .player-logo {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      font-weight: 900;
+    }
+
+    .logo-X {
+      background: linear-gradient(135deg, var(--accent), #38d9ff);
+      color: #001;
+      box-shadow: 0 6px 18px #00e5ff40;
+    }
+
+    .logo-O {
+      background: linear-gradient(135deg, var(--accent2), #ff63d3);
+      color: #001;
+      box-shadow: 0 6px 18px #ff00e040;
+    }
+
+    .logo-B {
+      background: linear-gradient(135deg, #fff, #ddd);
+      color: #001;
+      box-shadow: 0 6px 18px #ffffff40;
+    }
+
+    .player-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #e8f4ff;
+    }
+
+    .small {
+      font-size: 0.82rem;
+      opacity: 0.8;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .controls input[type="text"] {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      min-width: 160px;
+    }
+
+    .controls label {
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #121a31;
+      box-shadow: inset 0 0 0 1px #22305a;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #19305e, #0f1c3b);
+      color: #e8efff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 24px #0008;
+      transition: transform .08s ease;
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(.995);
+    }
+
+    .board {
+      aspect-ratio: 1/1;
+      width: min(520px, 92vw);
+      margin: 6px auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 10px;
+      background: linear-gradient(180deg, #0e1530, #0b1129);
+      border-radius: 18px;
+      box-shadow: inset 0 0 0 1px #243064, 0 20px 50px #0007;
+    }
+
+    .cell {
+      position: relative;
+      display: grid;
+      place-items: center;
+      height: 100%;
+      border-radius: 14px;
+      background: radial-gradient(160px 160px at 50% 60%, #0f1a3a, #0a0f22 70%);
+      box-shadow: inset 0 0 0 1px #1c274f, 0 8px 18px #0009;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .cell:hover {
+      box-shadow: inset 0 0 0 1px #2a3a73, 0 10px 24px #000a;
+    }
+
+    .cell:active {
+      transform: scale(0.99);
+    }
+
+    .mark {
+      font-weight: 900;
+      font-size: clamp(40px, 10vw, 88px);
+      letter-spacing: .02em;
+      line-height: 1;
+      text-shadow: 0 0 18px #00e5ff44, 0 0 36px #ff00e044;
+    }
+
+    .mark.X {
+      color: var(--accent);
+      filter: drop-shadow(0 0 16px #00e5ff70);
+    }
+
+    .mark.O {
+      color: var(--accent2);
+      filter: drop-shadow(0 0 16px #ff00e070);
+    }
+
+    .mark.B {
+      color: #fff;
+      filter: drop-shadow(0 0 14px #ffffff60);
+    }
+
+    .cell.win {
+      outline: 3px solid var(--win);
+      box-shadow:
+        0 0 22px #7cff0070,
+        inset 0 0 0 2px #274c1f;
+      background: radial-gradient(200px 200px at 50% 60%, #163418, #0a1711 65%);
+    }
+
+    .status {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 6px;
+      font-weight: 700;
+    }
+
+    .visit {
+      margin-top: 6px;
+      text-align: center;
+      opacity: .85;
+    }
+
+    footer.footer {
+      text-align: center;
+      margin: 14px 0 28px;
+      opacity: 0.85;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="title">Waste Your Time</header>
+
+  <!-- Cube -->
+  <div class="stage" id="stage">
+    <div class="scene" id="scene">
+      <div class="cube" id="cube">
+        <div class="face face--front"></div>
+        <div class="face face--back"></div>
+        <div class="face face--right"></div>
+        <div class="face face--left"></div>
+        <div class="face face--top"></div>
+        <div class="face face--bottom"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game -->
+  <section class="game-wrap" id="game">
+    <div class="game-header">
+      <div class="game-title">
+        <span style="opacity:.85;">Tic Tac Toe</span>
+        <div class="sg-icons" aria-hidden="true" title="Squid Game Icons">
+          <div class="sg-tri"></div>
+          <div class="sg-cir"></div>
+          <div class="sg-sqr"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="players">
+          <div class="player-card" id="p1Card">
+            <div class="player-logo logo-X" id="p1Logo">○</div>
+            <div>
+              <div class="player-name" id="p1NameDisplay">Player 1</div>
+              <div class="small">(X)</div>
+            </div>
+          </div>
+
+          <div class="player-card" id="p2Card">
+            <div class="player-logo logo-O" id="p2Logo">△</div>
+            <div>
+              <div class="player-name" id="p2NameDisplay">Player 2</div>
+              <div class="small">(O)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <input type="text" id="p1Input" placeholder="Player 1 name (X)">
+          <input type="text" id="p2Input" placeholder="Player 2 name (O) or Bot">
+          <label>
+            <input type="radio" name="first" value="p1" checked> First: X
+          </label>
+          <label>
+            <input type="radio" name="first" value="p2"> First: O
+          </label>
+
+          <button class="btn" id="startBtn">Start</button>
+          <button class="btn" id="vsBotBtn">Play vs Bot</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="justify-content:center;">
+      <span class="badge" id="turnBadge">Turn: —</span>
+      <span class="badge" id="scoreBadge">Score — X: <b id="sx">0</b> | O: <b id="so">0</b></span>
+      <button class="btn" id="newRoundBtn">New Round</button>
+      <button class="btn" id="resetAllBtn" title="Reset board & score">Reset All</button>
+    </div>
+
+    <div class="board" id="board" role="grid" aria-label="Tic Tac Toe Board"></div>
+    <div class="status" id="statusBar"></div>
+    <div class="visit" id="visitCount"></div>
+  </section>
+
+  <footer class="footer">Developed by MRINALxVIRUS TEAM</footer>
+
+  <script>
+    /* ===================== CUBE CONTROLS (unchanged) ===================== */
+    const stage = document.getElementById('stage');
+    const scene = document.getElementById('scene');
+
+    let rotX = -18, rotY = 24, scale = 1;
+    let isDragging = false, lastX = 0, lastY = 0, vX = 0, vY = 0, rafId = null;
+
+    function applyCube() {
+      scene.style.transform = `scale(${scale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    }
+    function animateInertia() {
+      vX *= 0.94; vY *= 0.94;
+      rotX += vY; rotY += vX;
+      applyCube();
+      if (Math.abs(vX) > 0.04 || Math.abs(vY) > 0.04) {
+        rafId = requestAnimationFrame(animateInertia);
+      } else { rafId = null; }
+    }
+    function getPoint(e) {
+      if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      return { x: e.clientX, y: e.clientY };
+    }
+    function onDown(e) {
+      isDragging = true;
+      const p = getPoint(e);
+      lastX = p.x; lastY = p.y;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    }
+    function onMove(e) {
+      if (!isDragging || (e.touches && e.touches.length > 1)) return;
+      const p = getPoint(e);
+      const dx = p.x - lastX, dy = p.y - lastY;
+      lastX = p.x; lastY = p.y;
+      rotY += dx * 0.3;
+      rotX -= dy * 0.3;
+      vX = dx * 0.18;
+      vY = -dy * 0.18;
+      applyCube();
+    }
+    function onUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      if (!rafId) rafId = requestAnimationFrame(animateInertia);
+    }
+
+    let pinchStartDist = 0, pinchStartScale = 1;
+    function dist(a, b) { const dx = a.clientX - b.clientX, dy = a.clientY - b.clientY; return Math.hypot(dx, dy); }
+
+    stage.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        pinchStartDist = dist(e.touches[0], e.touches[1]);
+        pinchStartScale = scale;
+      } else if (e.touches.length === 1) {
+        onDown(e);
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        const d = dist(e.touches[0], e.touches[1]);
+        const factor = d / pinchStartDist;
+        scale = Math.min(2.5, Math.max(0.5, pinchStartScale * factor));
+        applyCube();
+      } else {
+        onMove(e);
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) onUp();
+    });
+
+    stage.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+
+    stage.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = Math.sign(e.deltaY) > 0 ? 0.92 : 1.08;
+      scale = Math.min(2.5, Math.max(0.5, scale * factor));
+      applyCube();
+    }, { passive: false });
+
+    applyCube();
+
+    /* ===================== TIC TAC TOE LOGIC (updated) ===================== */
+    const boardEl = document.getElementById('board');
+    const turnBadge = document.getElementById('turnBadge');
+    const sxEl = document.getElementById('sx');
+    const soEl = document.getElementById('so');
+    const newRoundBtn = document.getElementById('newRoundBtn');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+    const startBtn = document.getElementById('startBtn');
+    const vsBotBtn = document.getElementById('vsBotBtn');
+    const statusBar = document.getElementById('statusBar');
+
+    let board = Array(9).fill(null);
+    let current = 'X';
+    let lock = false;
+    let scoreX = 0, scoreO = 0;
+    let players = { X: 'Player 1', O: 'Player 2' };
+    let vsBot = false;
+
+    // winning lines
+    const wins = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    function buildBoard() {
+      boardEl.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const c = document.createElement('button');
+        c.className = 'cell';
+        c.dataset.idx = i;
+        c.setAttribute('role', 'gridcell');
+        c.addEventListener('click', onCellClick);
+        boardEl.appendChild(c);
+      }
+    }
+
+    function onCellClick(e) {
+      if (lock) return;
+      const idx = Number(e.currentTarget.dataset.idx);
+      if (board[idx]) return;
+
+      placeMark(idx, current);
+      const winLine = checkWin();
+      if (winLine) {
+        endRound(winLine);
+        return;
+      }
+      if (board.every(Boolean)) {
+        drawRound();
+        return;
+      }
+      switchTurn();
+      // if now bot's turn, make bot move
+      if (vsBot && current === 'O') {
+        setTimeout(botMove, 420);
+      }
+    }
+
+    function placeMark(i, mark) {
+      board[i] = mark;
+      paintCell(i, mark);
+    }
+
+    function paintCell(i, mark) {
+      const cell = boardEl.children[i];
+      const span = document.createElement('span');
+      span.className = `mark ${mark === 'X' ? 'X' : (mark === 'O' ? 'O' : 'B')}`;
+      // show logos instead of letters for theme:
+      span.textContent = mark === 'X' ? '○' : (mark === 'O' ? '△' : '□');
+      cell.appendChild(span);
+    }
+
+    function checkWin() {
+      for (const line of wins) {
+        const [a, b, c] = line;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) return line;
+      }
+      return null;
+    }
+
+    function highlightWin(line) {
+      line.forEach(i => boardEl.children[i].classList.add('win'));
+    }
+
+    function endRound(winLine) {
+      lock = true;
+      highlightWin(winLine);
+      const winnerMark = board[winLine[0]];
+      if (winnerMark === 'X') { scoreX++; sxEl.textContent = String(scoreX); }
+      else { scoreO++; soEl.textContent = String(scoreO); }
+      turnBadge.textContent = `Winner: ${players[winnerMark]} (${winnerMark === 'X' ? '○' : '△'})`;
+      statusBar.textContent = `${players[winnerMark]} wins!`;
+    }
+
+    function drawRound() {
+      lock = true;
+      turnBadge.textContent = 'Draw!';
+      statusBar.textContent = `It's a draw!`;
+    }
+
+    function switchTurn() {
+      current = current === 'X' ? 'O' : 'X';
+      updateTurnBadge();
+    }
+
+    function updateTurnBadge() {
+      turnBadge.textContent = `Turn: ${players[current]} (${current === 'X' ? '○' : '△'})`;
+      statusBar.textContent = `${players[current]}'s turn — place your mark`;
+    }
+
+    // New round / reset
+    function newRound() {
+      board = Array(9).fill(null);
+      lock = false;
+      buildBoard();
+      // current stays same as previous starter, keep X as default starter for newRound
+      updateTurnBadge();
+      statusBar.textContent = `New round — ${players[current]} starts`;
+    }
+
+    function resetAll() {
+      scoreX = 0; scoreO = 0;
+      sxEl.textContent = '0'; soEl.textContent = '0';
+      // keep players same, reset board
+      current = 'X';
+      newRound();
+      statusBar.textContent = `Scores reset — ${players[current]} starts`;
+    }
+
+    // Start game with inputs
+    function startGame(manualVsBot = false) {
+      const p1 = document.getElementById('p1Input').value.trim();
+      const p2 = document.getElementById('p2Input').value.trim();
+      players.X = p1 || 'Player 1';
+      players.O = p2 || (manualVsBot ? 'Bot' : 'Player 2');
+
+      // update name displays & logos
+      document.getElementById('p1NameDisplay').textContent = players.X;
+      document.getElementById('p2NameDisplay').textContent = players.O;
+      // if p2 is bot, mark logo style
+      const p2Logo = document.getElementById('p2Logo');
+      if (players.O.toLowerCase().includes('bot')) {
+        p2Logo.classList.remove('logo-O');
+        p2Logo.classList.add('logo-B');
+        p2Logo.textContent = '□';
+      } else {
+        p2Logo.classList.remove('logo-B');
+        p2Logo.classList.add('logo-O');
+        p2Logo.textContent = '△';
+      }
+
+      // who starts? check radio
+      const first = document.querySelector('input[name="first"]:checked').value;
+      current = (first === 'p1' ? 'X' : 'O');
+
+      vsBot = manualVsBot || false;
+      // if vsBot manually enabled by button, set p2 field
+      if (vsBot) {
+        document.getElementById('p2Input').value = players.O;
+      }
+
+      buildBoard();
+      lock = false;
+      updateTurnBadge();
+      statusBar.textContent = `${players[current]} goes first`;
+      // if bot starts
+      if (vsBot && current === 'O') {
+        setTimeout(botMove, 600);
+      }
+    }
+
+    function botMove() {
+      if (lock) return;
+      // simple bot: win if possible, block if needed, else random center/corner/side preference
+      const empty = board.map((v, i) => v == null ? i : -1).filter(i => i >= 0);
+      if (!empty.length) return;
+
+      // try to win
+      for (const i of empty) {
+        const copy = board.slice(); copy[i] = 'O';
+        if (checkPotentialWin(copy, 'O')) { makeBotPlace(i); return; }
+      }
+      // block X
+      for (const i of empty) {
+        const copy = board.slice(); copy[i] = 'X';
+        if (checkPotentialWin(copy, 'X')) { makeBotPlace(i); return; }
+      }
+      // prefer center
+      if (empty.includes(4)) { makeBotPlace(4); return; }
+      // prefer corners
+      const corners = [0, 2, 6, 8].filter(i => empty.includes(i));
+      if (corners.length) { makeBotPlace(corners[Math.floor(Math.random() * corners.length)]); return; }
+      // else random
+      makeBotPlace(empty[Math.floor(Math.random() * empty.length)]);
+    }
+
+    function checkPotentialWin(simBoard, mark) {
+      return wins.some(line => line.every(i => simBoard[i] === mark));
+    }
+    function makeBotPlace(idx) {
+      placeMark(idx, 'O');
+      const winLine = checkWin();
+      if (winLine) { endRound(winLine); return; }
+      if (board.every(Boolean)) { drawRound(); return; }
+      current = 'X';
+      updateTurnBadge();
+    }
+
+    /* UI bindings */
+    newRoundBtn.addEventListener('click', () => {
+      newRound();
+    });
+    resetAllBtn.addEventListener('click', () => {
+      resetAll();
+    });
+    startBtn.addEventListener('click', () => startGame(false));
+    vsBotBtn.addEventListener('click', () => {
+      // enable vsBot and start
+      startGame(true);
+    });
+
+    /* init */
+    buildBoard();
+    turnBadge.textContent = 'Turn: —';
+    statusBar.textContent = 'Enter player names and press Start (or Play vs Bot)';
+
+    /* Visitor counter (localStorage) */
+    (function visitorCount() {
+      try {
+        let v = Number(localStorage.getItem('visit-count') || '0');
+        v = v + 1;
+        localStorage.setItem('visit-count', String(v));
+        document.getElementById('visitCount').textContent = `Visitors (this browser): ${v}`;
+      } catch (e) {
+        // ignore if localStorage blocked
+      }
+    })();
+
+  </script>
+</body>
+
+</html>
