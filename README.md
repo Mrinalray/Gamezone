@@ -1,21 +1,26 @@
-🟩 Neon Cube + Tic Tac Toe
+# 🎮 Game Zone – Tic Tac Toe
+### 🚀 Developed by **MRINALxVIRUS TEAM**
 
-A fun web project that combines a 3D Neon Rotating Cube with an interactive Tic Tac Toe Game. The cube gives a glowing futuristic vibe, while the game adds interactivity for users to play directly in the browser.
+A futuristic **Tic Tac Toe web game** built using **HTML, CSS, and JavaScript** with a neon cyber-style UI, animated 3D cube, live score tracking, and bot mode.
 
-✨ Features
+---
 
-🔲 3D Neon Rotating Cube – CSS and JavaScript-based animation with glowing edges.
+## ✨ Features
+✅ Neon glowing modern UI  
+✅ 3D rotating cube animation  
+✅ Player vs Player mode  
+✅ Player vs Bot mode 🤖  
+✅ Live turn indicator  
+✅ Score tracking system  
+✅ Responsive (Mobile + Desktop)  
 
-🎮 Tic Tac Toe Game – Classic 3×3 grid game with win detection.
+---
 
-📱 Responsive Design – Works smoothly on both desktop and mobile.
+## 🛠️ Tech Stack
+🧱 **HTML5** – Structure  
+🎨 **CSS3** – Styling & animations  
+🧠 **JavaScript (Vanilla)** – Game logic  
 
-🌌 Ambient Light Effect – Neon glow adds a modern gaming aesthetic.
+---
 
-🛠️ Tech Stack
-
-HTML5 – Structure
-
-CSS3 – Styling with neon glow & animations
-
-JavaScript (ES6) – Game logic and cube controls
+## 📁 Project Structure
