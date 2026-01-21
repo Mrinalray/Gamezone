@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>🎮 Game Zone | MRINALxVIRUS</title>
+
 <style>
   :root{
     --accent1:#00e5ff;
@@ -24,20 +25,23 @@
     align-items:center;
   }
 
-  /* animated background grid */
   body::before{
     content:"";
     position:fixed;
     inset:0;
-    background-image:linear-gradient(90deg,#111 1px,transparent 1px),linear-gradient(#111 1px,transparent 1px);
+    background-image:
+      linear-gradient(90deg,#111 1px,transparent 1px),
+      linear-gradient(#111 1px,transparent 1px);
     background-size:40px 40px;
     opacity:0.15;
     animation:bgmove 15s linear infinite;
     z-index:-1;
   }
-  @keyframes bgmove{0%{background-position:0 0;}100%{background-position:40px 40px;}}
+  @keyframes bgmove{
+    0%{background-position:0 0;}
+    100%{background-position:40px 40px;}
+  }
 
-  /* ===== Header ===== */
   h2{
     margin-top:30px;
     text-align:center;
@@ -48,21 +52,15 @@
     -webkit-text-fill-color:transparent;
     animation: shift 6s linear infinite;
     letter-spacing:2px;
-    text-shadow:0 0 10px #00f5ff44;
   }
   @keyframes shift{
     0%{background-position:0% 50%}
     50%{background-position:100% 50%}
     100%{background-position:0% 50%}
   }
-  p.tagline{
-    text-align:center;
-    opacity:.8;
-    font-size:1rem;
-    margin-bottom:10px;
-  }
 
-  /* ===== Glowing Cube ===== */
+  p.tagline{opacity:.8;margin-bottom:10px}
+
   .cube-area{
     perspective:1000px;
     height:220px;
@@ -83,72 +81,50 @@
     position:absolute;
     inset:0;
     background:linear-gradient(135deg,var(--accent1),var(--accent2));
-    opacity:0.9;
     border:2px solid #fff2;
-    box-shadow:0 0 25px var(--accent2);
   }
-  .front  {transform:translateZ(60px);}
-  .back   {transform:rotateY(180deg) translateZ(60px);}
-  .right  {transform:rotateY(90deg) translateZ(60px);}
-  .left   {transform:rotateY(-90deg) translateZ(60px);}
-  .top    {transform:rotateX(90deg) translateZ(60px);}
-  .bottom {transform:rotateX(-90deg) translateZ(60px);}
+  .front{transform:translateZ(60px)}
+  .back{transform:rotateY(180deg) translateZ(60px)}
+  .right{transform:rotateY(90deg) translateZ(60px)}
+  .left{transform:rotateY(-90deg) translateZ(60px)}
+  .top{transform:rotateX(90deg) translateZ(60px)}
+  .bottom{transform:rotateX(-90deg) translateZ(60px)}
 
-  /* ===== Game Section ===== */
   .game-wrap{
     width:min(95vw,600px);
-    background:linear-gradient(180deg,#0e1333,#090c21);
+    background:#0e1333;
     border-radius:14px;
-    box-shadow:0 0 40px #00f2ff33, inset 0 0 1px #1c2955;
     padding:20px;
-    backdrop-filter:blur(8px);
-    margin:10px auto 60px;
-    animation:fadeIn 1s ease forwards;
-  }
-  @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-
-  .game-header{text-align:center;margin-bottom:10px;}
-  .game-header h3{
-    font-size:clamp(20px,4vw,28px);
-    background:linear-gradient(90deg,var(--accent1),var(--accent2));
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    animation:shift 5s linear infinite;
+    margin-bottom:60px;
   }
   .controls{
     display:flex;
     flex-wrap:wrap;
     justify-content:center;
     gap:10px;
-    margin:10px 0;
   }
-  input[type=text]{
+  input{
     background:#11162e;
     border:1px solid #1e2c5f;
     border-radius:8px;
-    padding:8px 10px;
-    color:var(--text);
+    padding:8px;
+    color:#fff;
   }
   .btn{
     background:linear-gradient(135deg,var(--accent1),var(--accent2));
     border:none;
     padding:8px 12px;
     border-radius:10px;
-    color:#000;
-    font-weight:700;
     cursor:pointer;
-    transition:transform .1s ease;
+    font-weight:700;
   }
-  .btn:active{transform:scale(.96);}
   .badge{
     background:#0c1025;
-    border-radius:999px;
     padding:6px 12px;
-    box-shadow:inset 0 0 0 1px #273670;
+    border-radius:999px;
     font-weight:700;
   }
 
-  /* ===== Board ===== */
   .board{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -162,35 +138,23 @@
     display:grid;
     place-items:center;
     cursor:pointer;
-    box-shadow:inset 0 0 0 1px #1e2a5f,0 0 20px #0008;
-    transition:all .2s ease;
   }
-  .cell:hover{box-shadow:inset 0 0 0 1px var(--accent1),0 0 10px var(--accent1);}
   .mark{
-    font-size:clamp(36px,9vw,70px);
+    font-size:60px;
     font-weight:900;
   }
-  .mark.X{color:var(--accent1);text-shadow:0 0 16px var(--accent1);}
-  .mark.O{color:var(--accent2);text-shadow:0 0 16px var(--accent2);}
-  .cell.win{
-    background:#122d18;
-    box-shadow:0 0 20px var(--accent3),inset 0 0 0 2px var(--accent3);
-  }
+  .X{color:var(--accent1)}
+  .O{color:var(--accent2)}
+  .win{background:#122d18}
 
-  footer{
-    text-align:center;
-    margin:20px 0 30px;
-    opacity:.85;
-    font-size:0.9rem;
-    letter-spacing:1px;
-  }
+  footer{margin:20px;opacity:.8}
 </style>
 </head>
+
 <body>
   <h2>🎮 Game Zone</h2>
   <p class="tagline">All The Best From Team MRINALxVIRUS!</p>
 
-  <!-- Glowing Cube -->
   <div class="cube-area">
     <div class="cube">
       <div class="face front"></div>
@@ -202,87 +166,28 @@
     </div>
   </div>
 
-  <!-- Game -->
   <section class="game-wrap">
-    <div class="game-header"><h3>Tic Tac Toe</h3></div>
+    <h3 style="text-align:center">Tic Tac Toe</h3>
+
     <div class="controls">
-      <input type="text" id="p1Input" placeholder="Player 1 (X)">
-      <input type="text" id="p2Input" placeholder="Player 2 (O) or Bot">
+      <input id="p1Input" placeholder="Player 1 (X)">
+      <input id="p2Input" placeholder="Player 2 (O) or Bot">
       <button class="btn" id="startBtn">Start</button>
       <button class="btn" id="botBtn">Play vs Bot</button>
     </div>
-    <div style="text-align:center;margin-bottom:10px;">
+
+    <div style="text-align:center;margin:10px">
       <span class="badge" id="turnBadge">Turn: —</span>
-      <span class="badge" id="scoreBadge">X: <b id="sx">0</b> | O: <b id="so">0</b></span>
+      <span class="badge">X: <b id="sx">0</b> | O: <b id="so">0</b></span>
     </div>
+
     <div class="board" id="board"></div>
     <div id="status" style="text-align:center;margin-top:8px;"></div>
   </section>
 
   <footer>Developed by <b>MRINALxVIRUS TEAM</b></footer>
 
-<script>
-/* ===== Game Logic ===== */
-const boardEl=document.getElementById("board");
-const statusEl=document.getElementById("status");
-const sx=document.getElementById("sx"),so=document.getElementById("so");
-const turnBadge=document.getElementById("turnBadge");
-let board=[],current="X",lock=false,vsBot=false;
-let scoreX=0,scoreO=0,players={X:"Player 1",O:"Player 2"};
-const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-
-function buildBoard(){
-  board=Array(9).fill(null);
-  boardEl.innerHTML="";
-  for(let i=0;i<9;i++){
-    const c=document.createElement("div");
-    c.className="cell";
-    c.addEventListener("click",()=>cellClick(i));
-    boardEl.appendChild(c);
-  }
-  updateTurn();
-}
-function updateTurn(){turnBadge.textContent=`Turn: ${players[current]} (${current})`;}
-function cellClick(i){
-  if(lock||board[i])return;
-  place(i,current);
-  const winLine=checkWin();
-  if(winLine){highlight(winLine);endRound(current);return;}
-  if(board.every(Boolean)){statusEl.textContent="Draw!";lock=true;return;}
-  current=current==="X"?"O":"X";updateTurn();
-  if(vsBot&&current==="O")setTimeout(botMove,400);
-}
-function place(i,m){board[i]=m;const span=document.createElement("span");span.className=`mark ${m}`;span.textContent=m;boardEl.children[i].appendChild(span);}
-function checkWin(){return wins.find(l=>board[l[0]]&&board[l[0]]===board[l[1]]&&board[l[1]]===board[l[2]])||null;}
-function highlight(line){line.forEach(i=>boardEl.children[i].classList.add("win"));}
-function endRound(mark){
-  lock=true;
-  if(mark==="X"){scoreX++;sx.textContent=scoreX;}else{scoreO++;so.textContent=scoreO;}
-  statusEl.textContent=`${players[mark]} Wins!`;
-}
-function botMove(){
-  const empty=board.map((v,i)=>v?null:i).filter(i=>i!==null);
-  if(!empty.length)return;
-  const choice=empty[Math.floor(Math.random()*empty.length)];
-  place(choice,"O");
-  const winLine=checkWin();
-  if(winLine){highlight(winLine);endRound("O");return;}
-  if(board.every(Boolean)){statusEl.textContent="Draw!";lock=true;return;}
-  current="X";updateTurn();
-}
-
-/* Buttons */
-document.getElementById("startBtn").onclick=()=>start(false);
-document.getElementById("botBtn").onclick=()=>start(true);
-function start(bot){
-  vsBot=bot;
-  players.X=document.getElementById("p1Input").value||"Player 1";
-  players.O=bot?"Bot":(document.getElementById("p2Input").value||"Player 2");
-  current="X";lock=false;
-  statusEl.textContent=`${players.X} starts`;
-  buildBoard();
-}
-buildBoard();
-</script>
+  <!-- External JS -->
+  <script src="game.js"></script>
 </body>
 </html>
